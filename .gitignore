@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Results and Data Files
+results.csv
+results.json
+checkpoint.json
+*.csv
+*.json
+!requirements.txt
+
+# Logs
+*.log
+discovery.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.bak
+test_*.csv
+demo_*.csv
+
+# Sensitive or Large Data
+eu_gov_domains.csv
