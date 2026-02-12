@@ -86,7 +86,7 @@ def process_domain(domain: str, crawler: PublicCodeCrawler, validator: PublicCod
     validation = None
     if discovery.http_outcome == "success" and discovery.content:
         file_format = discovery.file_format or 'publiccode.yml'
-        validation = validator.validate(discovery.content, file_format)
+        validation = validator.validate(discovery.content, file_format, source_url=discovery.final_url)
     
     return discovery, validation
 

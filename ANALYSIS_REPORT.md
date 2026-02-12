@@ -1,11 +1,11 @@
 # PublicCode.yml Discovery and Validation Report
 
-**Generated:** 2026-02-09T20:56:01.408369
+**Generated:** 2026-02-12T20:29:49.762763
 
 ## Executive Summary
 
-- **Total Domains Tested:** 5
-- **Files Discovered:** 1
+- **Total Domains Tested:** 7
+- **Files Discovered:** 0
 - **Valid YAML:** 0
 - **Spec-Compliant:** 0
 - **High Quality (Useful):** 0
@@ -25,9 +25,7 @@ Validation was performed in three layers:
 
 ## Key Findings
 
-- **Discovery Rate:** 20.00% of domains have publiccode.yml
-- **Validation Rate:** 0.00% of discovered files are spec-compliant
-- **Quality Rate:** 0.00% of discovered files are high quality
+- **Discovery Rate:** 0.00% of domains have publiccode.yml
 
 ## Limitations
 

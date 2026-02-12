@@ -77,7 +77,7 @@ class PublicCodeValidator:
             logger.error(f"Error checking validator: {e}")
             return False
 
-    def validate(self, content: bytes, file_format: str = 'publiccode.yml') -> ValidationResult:
+    def validate(self, content: bytes, file_format: str = 'publiccode.yml', source_url: Optional[str] = None) -> ValidationResult:
         """
         Validate metadata file content through all validation layers.
         
@@ -93,7 +93,7 @@ class PublicCodeValidator:
         
         # Layer 1: Syntax Validation (YAML or JSON)
         if file_format == 'publiccode.yml':
-            self._validate_yaml_syntax(content, result)
+            self._validate_yaml_syntax(content, result, source_url)
         else:  # JSON formats
             self._validate_json_syntax(content, result)
             
@@ -119,10 +119,20 @@ class PublicCodeValidator:
         try:
             # Decode content
             text = content.decode('utf-8')
-            
-            # Check if content is HTML (common mistake)
-            text_lower = text.lower().strip()
-            if text_lower.startswith('<!doctype html') or text_lower.startswith('<html') or '<head>' in text_lower[:500]:
+
+            # Quick HTML/error heuristics using a small snippet
+            snippet = text[:2048].lower()
+
+            # If source URL suggests an error/document page, treat as HTML/error
+            if source_url:
+                url_lower = source_url.lower()
+                if any(token in url_lower for token in ('errordocument', 'errordocument.php', '/error', '/err', '/inicio/errordocument', 'login', 'forbidden', 'unauthorized')):
+                    result.yaml_error = f"Source URL indicates an error/landing page: {source_url}"
+                    logger.debug("Source URL indicates an error/landing page")
+                    return
+
+            # Detect HTML structures in the text snippet
+            if self._looks_like_html(snippet):
                 result.yaml_error = "HTML content returned instead of YAML"
                 logger.debug("Detected HTML content instead of YAML")
                 return
@@ -319,6 +329,31 @@ class PublicCodeValidator:
         result.useful = (score >= 60 and result.spec_valid)
         
         logger.debug(f"Usefulness score: {score}/100")
+
+    def _looks_like_html(self, snippet: str) -> bool:
+        """Heuristic to detect HTML or error pages from a text snippet."""
+        if not snippet:
+            return False
+
+        s = snippet.strip()
+        if s.startswith('<!doctype') or s.startswith('<html'):
+            return True
+
+        # Presence of HTML tags early in the document
+        if '<html' in s or '<head' in s or '<body' in s or '<!doctype' in s or '<script' in s:
+            return True
+
+        # CMS/error keywords that often indicate HTML landing pages
+        keywords = ['404', 'not found', 'error', 'forbidden', 'unauthorized', 'login', 'index of', '<title>error', 'php']
+        matches = sum(1 for kw in keywords if kw in s)
+        if matches >= 2:
+            return True
+
+        # Many angle brackets -> likely HTML
+        if s.count('<') > 5 and s.count('>') > 5:
+            return True
+
+        return False
 
     def _check_description(self, data: Dict) -> bool:
         """Check for meaningful description."""

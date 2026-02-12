@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional, List, Dict
 from urllib.parse import urljoin
+import re
 
 import requests
 from requests.adapters import HTTPAdapter
@@ -171,24 +172,58 @@ class PublicCodeCrawler:
     def _try_protocol(self, domain: str, protocol: str) -> DiscoveryResult:
         """Try to discover file using a specific protocol."""
         base_url = f"{protocol}://{domain}"
-        
+        # Check common site files that are more likely to exist and may reference metadata
+        common_check = self._check_common_files(domain, base_url)
+        if common_check is not None:
+            return common_check
+
         for path in config.PATHS_TO_TEST:
             url = urljoin(base_url, path)
             result = self._fetch_url(domain, url)
-            
+
             if result.http_outcome == "success":
                 logger.info(f"Found {result.file_format} at: {result.final_url}")
                 return result
-            
+
             # Small delay between requests to same domain
             time.sleep(config.RATE_LIMIT_DELAY)
-        
+
         # No file found for this protocol
         return DiscoveryResult(
             domain=domain,
             http_outcome="not_found",
             error_message=f"No metadata file found via {protocol}"
         )
+
+    def _check_common_files(self, domain: str, base_url: str) -> Optional[DiscoveryResult]:
+        """Check `robots.txt` and `humans.txt` for any references to publiccode or metadata.
+
+        If a direct reference to a metadata URL is found, attempt to fetch it.
+        Otherwise, return None to continue normal discovery.
+        """
+        for name in ("/robots.txt", "/humans.txt"):
+            url = urljoin(base_url, name)
+            try:
+                resp = self.session.get(url, timeout=config.REQUEST_TIMEOUT)
+            except Exception:
+                continue
+
+            if resp.status_code != 200:
+                continue
+
+            text = resp.text.lower()
+            # Look for explicit references to publiccode or metadata files
+            if "publiccode" in text or "publiccode.yml" in text or "publiccode.yaml" in text:
+                # Try to extract any http(s) URL from the file
+                urls = re.findall(r"https?://[\w\-\.\/:?=&%]+", text)
+                # Prefer explicit references, otherwise try conventional path
+                targets = urls if urls else [urljoin(base_url, "/publiccode.yml"), urljoin(base_url, "/.well-known/publiccode.yml")]
+                for target in targets:
+                    res = self._fetch_url(domain, target)
+                    if res.http_outcome == "success":
+                        return res
+
+        return None
 
     def _fetch_url(self, domain: str, url: str) -> DiscoveryResult:
         """
@@ -204,6 +239,35 @@ class PublicCodeCrawler:
         start_time = time.time()
         
         try:
+            # Do a HEAD request first to inspect content-type and length when available
+            try:
+                head = self.session.head(url, timeout=config.REQUEST_TIMEOUT, allow_redirects=config.FOLLOW_REDIRECTS)
+                ct = head.headers.get('Content-Type', '')
+                content_length = head.headers.get('Content-Length')
+                if content_length and int(content_length) > config.MAX_FILE_SIZE:
+                    return DiscoveryResult(
+                        domain=domain,
+                        file_url=url,
+                        http_status=head.status_code,
+                        http_outcome="size_exceeded",
+                        final_url=head.url,
+                        error_message=f"Content-Length {content_length} exceeds limit"
+                    )
+
+                # If the HEAD reports HTML, skip full download early
+                if ct and 'html' in ct.lower():
+                    return DiscoveryResult(
+                        domain=domain,
+                        file_url=url,
+                        http_status=head.status_code,
+                        http_outcome="html_content",
+                        final_url=head.url,
+                        error_message="Content-Type indicates HTML"
+                    )
+            except Exception:
+                # Ignore HEAD failures and continue with GET
+                head = None
+
             response = self.session.get(
                 url,
                 timeout=config.REQUEST_TIMEOUT,
@@ -242,6 +306,21 @@ class PublicCodeCrawler:
                         error_message=f"Downloaded size exceeds {config.MAX_FILE_SIZE} bytes",
                         response_time_ms=response_time_ms
                     )
+
+            # Quick heuristic: if the downloaded content looks like HTML, treat as HTML
+            try:
+                snippet = content[:1024].lower().decode('utf-8', errors='ignore')
+                if self._looks_like_html(snippet):
+                    return DiscoveryResult(
+                        domain=domain,
+                        file_url=url,
+                        http_status=response.status_code,
+                        http_outcome="html_content",
+                        final_url=response.url,
+                        error_message="Downloaded content appears to be HTML"
+                    )
+            except Exception:
+                pass
             
             # Build redirect chain
             redirect_chain = []
