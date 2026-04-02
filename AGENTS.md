@@ -205,3 +205,20 @@ It exists to **measure observable behavior**, not to judge intent.
 
 Agent runs must be attributable to a human maintainer.  
 All automated requests must include a contact reference.
+
+---
+
+## Python Coding Standards
+
+All Python code in this repository must follow the conventions described in
+[PYTHON_GUIDANCE.md](PYTHON_GUIDANCE.md).
+
+Key requirements for agents generating or modifying Python:
+
+- Run `flake8 *.py` before committing; zero warnings required.
+- Every function and class must have a docstring (Google style).
+- All function signatures must include type annotations.
+- Use `Optional[str]` (not `str = None`) for optional parameters.
+- Blank lines inside functions must contain no trailing whitespace (W293).
+- Keep functions to ≤ 50 lines (excluding docstrings).
+- Never use a bare `except:`; always catch specific exception types.
