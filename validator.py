@@ -312,6 +312,11 @@ class PublicCodeValidator:
 
         data = result.parsed_yaml
 
+        # Non-dict content (e.g. a JSON array) cannot be assessed
+        if not isinstance(data, dict):
+            result.usefulness_issues.append("Content is not a key-value mapping")
+            return
+
         # Check 1: Has meaningful description (20 points)
         if self._check_description(data):
             score += 20
@@ -402,7 +407,7 @@ class PublicCodeValidator:
         if not isinstance(legal, dict):
             return False
 
-        return 'license' in legal and legal['license']
+        return bool('license' in legal and legal['license'])
 
     def _check_maintenance(self, data: Dict) -> bool:
         """Check for maintenance information."""
