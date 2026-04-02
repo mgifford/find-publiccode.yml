@@ -27,7 +27,11 @@ FOLLOW_REDIRECTS = True
 MAX_REDIRECTS = 5
 REQUEST_TIMEOUT = 10  # seconds
 MAX_FILE_SIZE = 512 * 1024  # 512 KB
-USER_AGENT = "PublicCode-Research-Bot/1.0 (+https://github.com/publiccodeyml/publiccode.yml; contact: github.com/mgifford)"
+USER_AGENT = (
+    "PublicCode-Research-Bot/1.0"
+    " (+https://github.com/publiccodeyml/publiccode.yml;"
+    " contact: github.com/mgifford)"
+)
 
 # Domain Variation Testing
 TEST_WWW_VARIATIONS = True  # Test both www. and non-www. versions of domains

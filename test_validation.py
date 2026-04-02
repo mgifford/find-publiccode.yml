@@ -25,7 +25,7 @@ result1 = validator.validate(html_content)
 print('Test 1: HTML Content (like aia.estv.admin.ch)')
 print(f'  yaml_valid: {result1.yaml_valid}')
 print(f'  yaml_error: {result1.yaml_error}')
-print(f'  ✓ Clean error message (was: long HTML parse error)')
+print('  ✓ Clean error message (was: long HTML parse error)')
 print()
 
 # Test 2: Valid YAML
@@ -37,7 +37,7 @@ result2 = validator.validate(yaml_content)
 print('Test 2: Valid YAML')
 print(f'  yaml_valid: {result2.yaml_valid}')
 print(f'  yaml_error: {result2.yaml_error}')
-print(f'  ✓ Passes validation')
+print('  ✓ Passes validation')
 print()
 
 # Test 3: Invalid YAML with long error
@@ -50,7 +50,7 @@ result3 = validator.validate(bad_yaml)
 print('Test 3: Bad YAML (long error)')
 print(f'  yaml_valid: {result3.yaml_valid}')
 print(f'  yaml_error: {result3.yaml_error}')
-print(f'  ✓ Error message truncated (was: multi-line parse error)')
+print('  ✓ Error message truncated (was: multi-line parse error)')
 print()
 
 print("="*60)
