@@ -1,0 +1,19 @@
+[project]
+name = "find-publiccode-yml"
+version = "0.1.0"
+description = "Discovery and validation framework for publiccode.yml files"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "requests>=2.31.0",
+    "PyYAML>=6.0",
+    "validators>=0.22.0",
+    "pandas>=2.2.0",
+    "tqdm>=4.66.0",
+]
+
+[dependency-groups]
+dev = [
+    "flake8>=7.0.0",
+    "pytest>=8.0.0",
+]

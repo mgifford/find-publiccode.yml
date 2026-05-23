@@ -13,7 +13,7 @@ This framework provides a rigorous, reproducible method for discovering and vali
 ./setup.sh
 
 # Activate the virtual environment
-source venv/bin/activate
+source .venv/bin/activate
 ```
 
 ### 2. Test Run (Recommended First)
@@ -21,7 +21,7 @@ source venv/bin/activate
 Test with a small sample before processing all domains:
 
 ```bash
-python3 main.py --limit 10 --output test_results.csv --verbose
+uv run python3 main.py --limit 10 --output test_results.csv --verbose
 ```
 
 ### 3. Full Analysis
@@ -29,7 +29,7 @@ python3 main.py --limit 10 --output test_results.csv --verbose
 Process all ~18,700 domains:
 
 ```bash
-python3 main.py --input eu_gov_domains.csv --output results.csv
+uv run python3 main.py --input eu_gov_domains.csv --output results.csv
 ```
 
 **Estimated time:** 4-6 hours (depends on network speed and server response times)
@@ -58,19 +58,19 @@ python3 main.py --input eu_gov_domains.csv --output results.csv
 
 ```bash
 # Small test run
-python3 main.py --limit 5 --output test.csv
+uv run python3 main.py --limit 5 --output test.csv
 
 # Full run with JSON output
-python3 main.py --output results.csv --output-json results.json
+uv run python3 main.py --output results.csv --output-json results.json
 
 # Resume interrupted run
-python3 main.py --output results.csv --resume
+uv run python3 main.py --output results.csv --resume
 
 # Custom concurrency
-python3 main.py --workers 20 --output results.csv
+uv run python3 main.py --workers 20 --output results.csv
 
 # Verbose logging to file
-python3 main.py --verbose --log-file discovery.log --output results.csv
+uv run python3 main.py --verbose --log-file discovery.log --output results.csv
 ```
 
 ## Understanding Results
@@ -149,7 +149,7 @@ The framework automatically generates `ANALYSIS_REPORT.md` with:
 The framework saves checkpoints every 100 domains (configurable). If interrupted:
 
 ```bash
-python3 main.py --output results.csv --resume
+uv run python3 main.py --output results.csv --resume
 ```
 
 Checkpoint file: `checkpoint.json`

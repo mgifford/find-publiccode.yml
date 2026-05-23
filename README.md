@@ -96,20 +96,21 @@ See `config.py` for:
 ## Usage
 
 ```bash
-# Install dependencies
-pip install -r requirements.txt
+# Install uv and dependencies
+python3 -m pip install --user uv
+uv sync
 
 # Install publiccode-parser-go
 go install github.com/italia/publiccode-parser-go/v5/publiccode-parser@latest
 
 # Run discovery
-python main.py --input eu_gov_domains.csv --output results.csv
+uv run python main.py --input eu_gov_domains.csv --output results.csv
 
 # Resume from checkpoint
-python main.py --input eu_gov_domains.csv --output results.csv --resume
+uv run python main.py --input eu_gov_domains.csv --output results.csv --resume
 
 # Test mode (first 100 domains)
-python main.py --input eu_gov_domains.csv --output results.csv --limit 100
+uv run python main.py --input eu_gov_domains.csv --output results.csv --limit 100
 ```
 
 ## Reproducibility
