@@ -14,10 +14,19 @@ python3 --version || { echo "Error: Python 3 not found"; exit 1; }
 echo "✓ Python 3 available"
 echo
 
-# Create virtual environment
-if [ ! -d "venv" ]; then
-    echo "Creating virtual environment..."
-    python3 -m venv venv
+# Check for uv
+echo "Checking for uv..."
+if ! command -v uv &> /dev/null; then
+    echo "uv not found. Installing uv with pip..."
+    python3 -m pip install --user uv
+fi
+echo "✓ uv available"
+echo
+
+# Create virtual environment with uv
+if [ ! -d ".venv" ]; then
+    echo "Creating virtual environment with uv..."
+    uv venv .venv
     echo "✓ Virtual environment created"
 else
     echo "✓ Virtual environment already exists"
@@ -26,8 +35,8 @@ echo
 
 # Install Python dependencies
 echo "Installing Python dependencies..."
-source venv/bin/activate
-pip install -q -r requirements.txt
+source .venv/bin/activate
+uv sync
 echo "✓ Python dependencies installed"
 echo
 
@@ -73,14 +82,14 @@ echo "Setup Complete!"
 echo "=================================="
 echo
 echo "IMPORTANT: Activate the virtual environment before running:"
-echo "  source venv/bin/activate"
+echo "  source .venv/bin/activate"
 echo
 echo "To test the framework:"
-echo "  python3 main.py --limit 5 --output test_results.csv"
+echo "  uv run python3 main.py --limit 5 --output test_results.csv"
 echo
 echo "To run on all domains:"
-echo "  python3 main.py --input eu_gov_domains.csv --output results.csv"
+echo "  uv run python3 main.py --input eu_gov_domains.csv --output results.csv"
 echo
 echo "For help:"
-echo "  python3 main.py --help"
+echo "  uv run python3 main.py --help"
 echo
