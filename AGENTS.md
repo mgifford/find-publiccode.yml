@@ -161,6 +161,27 @@ If execution constraints prevent full completion, agents must:
 
 ---
 
+## Security Best Practices
+
+Even though this project operates on public information, agents must still apply
+security best practices.
+
+Agents must:
+
+- Avoid collecting, storing, or exposing secrets and credentials
+- Validate and sanitize all external inputs before processing
+- Keep dependencies current and track known vulnerabilities
+- Use least-privilege access for local and remote execution contexts
+- Log security-relevant failures and assumptions for human review
+
+Agents must not:
+
+- Introduce unsafe code patterns that increase attack surface
+- Suppress or ignore dependency and supply-chain risk signals
+- Treat public data as inherently safe without validation
+
+---
+
 ## Human Oversight
 
 All agent-generated outputs require human review before:
